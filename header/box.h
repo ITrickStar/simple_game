@@ -1,63 +1,66 @@
-#include "entities.h"
-#include <iostream>
+// поле отрисовывается отдельно
+// очередность ходов - позиции элементов в этом массиве
+// для перемещения используются внутренние методы объектов
 
+
+#include "entities.h"
+
+// класс реализующий поле где происходит игра
 class box
 {
 private:
     int mapsize;
     int plcount;
-    creature *player;
+    creature *players; // массив с "игроками"
 
-    void arrange()
-    {
-        for (int i = 0; i < plcount; i++)
-        {
-            player[i].setCoord((rand() % mapsize) + 1);
-            auto mem = player[i].getCoord();
-        }
-        for (int j = 0; j < plcount; j++)
-        {
-            for (int i = 0; i < plcount; i++)
-            {
-                if (player[j].getCoord() == player[i].getCoord() && i != j)
-                {
-                    player[i].setCoord((rand() % (mapsize)) + 1);
-                    j--;
-                    break;
-                }
-            }
-            auto mem = player[j].getCoord();
-        }
-    }
+    void arrange(); // размещает фигуры на доске, используется в конструкторе
+    void print(); // выводит поле в консоль, плохо оптимизирована
+    void kill(int, int); // удаляет убитого игрока с поля
 
 public:
     box(int);
     ~box();
 
-    void print();
-    void kill(int murder, int victim)
-    {
-        std::cout << player[murder].getName() << " killed " << player[victim].getName() << std::endl;
-        for (int j = victim; j < plcount - 1; j++)
-            player[j] = player[j + 1];
-        plcount--;
-    }
-
-    std::string fight();
+    std::string fight(); // этот метод и есть сама игра
 };
 
+void box::arrange()
+{
+    for (int i = 0; i < plcount; i++)
+    {
+        players[i].setCoord((rand() % mapsize) + 1);
+        auto mem = players[i].getCoord();
+    }
+    for (int j = 0; j < plcount; j++)
+    {
+        for (int i = 0; i < plcount; i++)
+        {
+            if (players[j].getCoord() == players[i].getCoord() && i != j)
+            {
+                players[i].setCoord((rand() % (mapsize)) + 1);
+                j--;
+                break;
+            }
+        }
+        auto mem = players[j].getCoord();
+    }
+}
+
+// вроде вынес основные вычисления, но все равно выглядит громоздко
 box::box(int size)
 {
     mapsize = size;
     plcount = 3;
-    if (plcount > mapsize)
-        throw("error");
-    rook pl1;
+    if (plcount > mapsize || mapsize <= 0)
+        throw("error"); // опять использую без try/catch,
+                        // он здесь сугубо чтобы программа вылетела
+    rook pl1;   // наверное добавление объектов можно сделать лучше
     bishop pl2;
     pawn pl3;
-    player = new creature[plcount]{pl1, pl2, pl3};
+    players = new creature[plcount]{pl1, pl2, pl3};
     arrange();
 }
+
 
 std::string box::fight()
 {
@@ -67,33 +70,42 @@ std::string box::fight()
         std::cout << "turn: " << turns++ << std::endl;
         for (int i = 0; i < plcount; i++)
         {
-            position nextmove = player[i].move(mapsize);
+            position nextmove = players[i].move(mapsize);
             bool atk = false;
             for (int j = 0; j < plcount; j++)
             {
 
-                if (i != j && nextmove == player[j].getCoord())
+                if (i != j && nextmove == players[j].getCoord())
                 {
-                    player[i].attack(player[j]);
+                    players[i].attack(players[j]);
                     atk = true;
-                    if (player[j].hp <= 0)
+                    if (players[j].hp <= 0)
                         kill(i, j);
                     break;
                 }
             }
             if (!atk)
             {
-                std::cout << player[i].getName() << ": " << player[i].getCoord() << " -> " << nextmove << std::endl;
-                player[i].setCoord(nextmove);
+                std::cout << players[i].getName() << ": " << players[i].getCoord() << " -> " << nextmove << std::endl;
+                players[i].setCoord(nextmove);
             }
         }
 
         print();
     }
-    std::cout << "turns: " << turns-1 << "; winner: ";
-    return player->getName();
+    std::cout << "turns: " << turns - 1 << "; winner: ";
+    return players->getName();
 }
 
+void box::kill(int murder, int victim)
+{
+    std::cout << players[murder].getName() << " killed " << players[victim].getName() << std::endl;
+    for (int j = victim; j < plcount - 1; j++)
+        players[j] = players[j + 1];
+    plcount--;
+}
+
+// не знаю что придумать лучше кроме сравнивать позиции объектов и номер клетки
 void box::print()
 {
     bool f;
@@ -104,9 +116,9 @@ void box::print()
             std::cout << '|';
             f = true;
             for (int p = 0; p < plcount; p++)
-                if (j == player[p].getCoord().x && i == player[p].getCoord().y)
+                if (j == players[p].getCoord().x && i == players[p].getCoord().y)
                 {
-                    std::cout << player[p].getName()[0];
+                    std::cout << players[p].getName()[0];
                     f = false;
                 }
             if (f)
@@ -117,8 +129,4 @@ void box::print()
     std::cout << std::endl;
 }
 
-box::~box() { delete[] player; }
-
-// поле есть двумерный массив указателей на объекты
-// очередность ходов - позиции элементов в этом массиве
-// для перемещения используются встроенные методы объектов
+box::~box() { delete[] players; }

@@ -1,6 +1,4 @@
-#include <random>
-#include <string>
-
+// структура описывающая позицию фигуры
 struct position
 {
     int x, y;
@@ -35,7 +33,6 @@ struct position
 
     friend std::ostream &operator<<(std::ostream &out, position input);
 };
-
 std::ostream &operator<<(std::ostream &out, position input)
 {
     out << '[' << input.x << ", " << input.y << ']';
@@ -43,6 +40,8 @@ std::ostream &operator<<(std::ostream &out, position input)
     return out;
 }
 
+// класс-предок
+// не придумал как его сделать чисто виртуальным или интерфейсом
 class creature
 {
 private:
@@ -54,7 +53,7 @@ protected:
     position coord;
 
 public:
-    int hp;
+    int hp; // сделал публичным, тк поле легче менять напрямую
 
     creature(std::string _name = nullptr, int _hp = 0, int _dmg = 0, int _speed = 0) : name(_name), hp(_hp), dmg(_dmg), speed(_speed), coord(0, 0){};
 
@@ -68,12 +67,17 @@ public:
     std::string getName() const { return name; }
 };
 
+// метод получает ссылку на объект и вычитает из его hp параметр dmg
+// также выводит действие в консоль
+// мог бы конечно придумать что интереснее
 void creature::attack(creature &body)
 {
     body.hp -= this->dmg;
     std::cout << this->getName() << " attacked " << body.getName() << std::endl;
 }
 
+// просто увеличивает или уменьшает случайный параметр
+// возвращает следующую позицию, но не присваетвает его полю
 position creature::move(int mapsize)
 {
     position newpos = coord;
@@ -90,6 +94,8 @@ position creature::move(int mapsize)
     return newpos;
 }
 
+// пока классы-наследники отличаются только параметрами
+// попробую переопределить для них методы
 class rook : public creature
 {
 public:
