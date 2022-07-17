@@ -6,7 +6,7 @@ struct position
     int x, y;
     position(int _x, int _y) : x(_x), y(_y) {}
 
-    position& operator=(int i)
+    position &operator=(int i)
     {
         x = i;
         y = i;
@@ -42,10 +42,10 @@ private:
 protected:
     int dmg;
     int speed;
+    position coord;
 
 public:
     int hp;
-    position coord;
 
     creature(std::string _name = nullptr, int _hp = 0, int _dmg = 0, int _speed = 0) : name(_name), hp(_hp), dmg(_dmg), speed(_speed), coord(0, 0){};
 
@@ -53,6 +53,9 @@ public:
     virtual void attack(creature &body) { body.hp -= this->dmg; }
     int getDmg() const { return dmg; }
     int getSpeed() const { return speed; }
+    position getCoord() const { return coord; }
+    void setCoord(int key) { coord = key; }
+    void setCoord(position key) { coord = key; }
     std::string getName() const { return name; }
 };
 
@@ -60,13 +63,15 @@ position creature::move(int mapsize)
 {
     position newpos = coord;
     for (int i = 0; i < speed; i++)
+    {
         if (rand() % 2)
             (rand() % 2) ? newpos.x++ : newpos.x--;
         else
             (rand() % 2) ? newpos.y++ : newpos.y--;
+        if (newpos > mapsize || newpos < mapsize)
+            newpos = move(mapsize);
+    }
 
-    if (newpos > mapsize || newpos < mapsize)
-        newpos = move(mapsize);
     return newpos;
 }
 

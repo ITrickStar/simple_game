@@ -14,23 +14,24 @@ public:
 
     void kill(int j)
     {
-        for (j + 1; j < plcount; j++)
-            player[j] = player[j - 1];
+        std::cout << "player killed " << player[j].getName() << std::endl;
+        for (j; j < plcount - 1; j++)
+            player[j] = player[j + 1];
         plcount--;
     }
 
-    creature fight()
+    std::string fight()
     {
         while (plcount > 1)
             for (int i = 0; i < plcount; i++)
             {
                 position nextmove = player[i].move(mapsize);
-                std::string ame = player[i].getName(); 
-                bool atk;
+                creature ame = player[i];
+                bool atk = false;
                 for (int j = 0; j < plcount; j++)
                 {
 
-                    if (i != j && nextmove == player[j].coord)
+                    if (i != j && nextmove == player[j].getCoord())
                     {
                         player[i].attack(player[j]);
                         if (player[j].hp <= 0)
@@ -40,9 +41,9 @@ public:
                     }
                 }
                 if (!atk)
-                    player[i].coord = nextmove;
+                    player[i].setCoord(nextmove);
             }
-        return *player;
+        return player->getName();
     }
 };
 
@@ -55,9 +56,9 @@ box::box(int size)
     bishop pl2;
     pawn pl3;
     player = new creature[plcount]{pl1, pl2, pl3};
-    for (int i = 1; i < plcount; i++)
+    for (int i = 0; i < plcount; i++)
     {
-        player[i].coord = i;
+        player[i].setCoord(i + 1);
     }
 }
 

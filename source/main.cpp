@@ -3,8 +3,9 @@
 
 int main()
 {
+    srand(time(0));
     box desc(3);
-    desc.fight();
+    std::cout << desc.fight();
 
     return 0;
 }
