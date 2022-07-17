@@ -32,7 +32,16 @@ struct position
             return true;
         return false;
     }
+
+    friend std::ostream &operator<<(std::ostream &out, position input);
 };
+
+std::ostream &operator<<(std::ostream &out, position input)
+{
+    out << '[' << input.x << ", " << input.y << ']';
+
+    return out;
+}
 
 class creature
 {
@@ -50,7 +59,7 @@ public:
     creature(std::string _name = nullptr, int _hp = 0, int _dmg = 0, int _speed = 0) : name(_name), hp(_hp), dmg(_dmg), speed(_speed), coord(0, 0){};
 
     virtual position move(int);
-    virtual void attack(creature &body) { body.hp -= this->dmg; }
+    virtual void attack(creature &body);
     int getDmg() const { return dmg; }
     int getSpeed() const { return speed; }
     position getCoord() const { return coord; }
@@ -58,6 +67,12 @@ public:
     void setCoord(position key) { coord = key; }
     std::string getName() const { return name; }
 };
+
+void creature::attack(creature &body)
+{
+    body.hp -= this->dmg;
+    std::cout << this->getName() << " attacked " << body.getName() << std::endl;
+}
 
 position creature::move(int mapsize)
 {

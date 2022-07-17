@@ -61,13 +61,13 @@ box::box(int size)
 
 std::string box::fight()
 {
-    int turns = 0;
+    int turns = 1;
     while (plcount > 1)
     {
+        std::cout << "turn: " << turns++ << std::endl;
         for (int i = 0; i < plcount; i++)
         {
             position nextmove = player[i].move(mapsize);
-            creature ame = player[i];
             bool atk = false;
             for (int j = 0; j < plcount; j++)
             {
@@ -75,24 +75,46 @@ std::string box::fight()
                 if (i != j && nextmove == player[j].getCoord())
                 {
                     player[i].attack(player[j]);
+                    atk = true;
                     if (player[j].hp <= 0)
                         kill(i, j);
-                    atk = true;
                     break;
                 }
             }
             if (!atk)
+            {
+                std::cout << player[i].getName() << ": " << player[i].getCoord() << " -> " << nextmove << std::endl;
                 player[i].setCoord(nextmove);
+            }
         }
-        turns++;
+
+        print();
     }
-    std::cout << turns << " winner ";
+    std::cout << "turns: " << turns-1 << "; winner: ";
     return player->getName();
 }
 
 void box::print()
 {
-    
+    bool f;
+    for (int i = 1; i < mapsize + 1; i++)
+    {
+        for (int j = 1; j < mapsize + 1; j++)
+        {
+            std::cout << '|';
+            f = true;
+            for (int p = 0; p < plcount; p++)
+                if (j == player[p].getCoord().x && i == player[p].getCoord().y)
+                {
+                    std::cout << player[p].getName()[0];
+                    f = false;
+                }
+            if (f)
+                std::cout << ' ';
+        }
+        std::cout << '|' << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 box::~box() { delete[] player; }

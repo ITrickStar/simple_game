@@ -4,7 +4,7 @@
 int main()
 {
     srand(time(0));
-    box desc(30);
+    box desc(3);
     std::cout << desc.fight();
 
     return 0;
